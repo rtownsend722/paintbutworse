@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Paint But Worse</title>
+</head>
+<body>
+<h1>It's Like Paint, But Worse</h1>
+<div>Select Pen Size</div>
+<div id="buttons">
+  <button class='random'>Random</button>
+  <button class='small'>Small</button>
+  <button class='medium'>Medium</button>
+  <button class='large'>Large</button>
+  <button class='huge'>Huge</button>
+</div>
+<div id="utilities">
+  <button class="erase">Eraser</button>
+  <button class="draw">Pen</button>
+<div>Select Color</div>
+  <input class="color-picker" type="color" value="#ff0000">
+</div>
+<div>
+  <canvas id="draw" width="900" height="650"></canvas>
+</div>
+<style>
+  #draw {
+    border: solid black 3px;
+  }
+</style>
+<script>
+
+/*Variables*/
+
+  const getRandomHEX = () => {
+    return '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+  };
+
+  const canvas = document.querySelector('#draw');
+  const ctx = canvas.getContext('2d');
+  const colorPicker = document.querySelector('.color-picker');
+  const buttons = document.querySelectorAll('button');
+
+  ctx.strokeStyle = getRandomHEX();
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 5;
+  // ctx.globalCompositeOperation = 'lighten';
+
+  let size = 5;
+  let drawing = false;
+  let [lastX, lastY] = [0, 0];
+  let resize = true;
+  let direction = true;
+  let hue = getRandomHEX();
+  // let lightness = 50;
+  // let saturation = 100;
+
+/*Methods*/
+
+  function draw(e) {
+    if (!drawing) { return; }
+
+    ctx.strokeStyle = `${hue}`;
+    ctx.lineWidth = size;
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+
+    // hue++;
+    // if (hue >= 360) {
+    //   hue = 0;
+    // }
+
+    if (resize) {
+      if (direction) {
+        ctx.lineWidth++;
+      } else {
+        ctx.lineWidth--;
+      }
+
+      if (ctx.lineWidth <= 10 || ctx.lineWidth >= 100) {
+        direction = !direction;
+      }
+
+    }
+  };
+
+  function handleClick(e) {
+    let button = e.target.classList[0];
+    if (button === 'small') {
+      size = 5;
+      return;
+    } else if (button === 'medium') {
+      size = 15;
+      return;
+    } else if (button === 'large') {
+      size = 30;
+      return;
+    } else if (button === 'huge') {
+      size = 50;
+      return;
+    } else if (button === 'erase') {
+      hue = 'white';
+      saturation = 0;
+      lightness = 100;
+    } else if (button === 'draw') {
+      hue = getRandomHEX();
+      saturation = 100;
+      lightness = 50;
+    } else {
+      size = Math.floor(Math.random() * 100);
+      return;
+    }
+
+  };
+
+  function selectColor(e) {
+    console.log(e.target.value);
+    hue = e.target.value;
+  };
+
+/*Event Listeners*/
+ document.addEventListener('mousemove', draw); 
+
+ document.addEventListener('mousedown', (e) => {
+    drawing = true;
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+ });
+
+ document.addEventListener('mouseup', () => {
+  drawing = false;
+ });
+
+ document.addEventListener('mouseout', () => {
+  drawing = false;
+ });
+
+ buttons.forEach(button => {
+  button.addEventListener('click', handleClick);
+ });
+
+ colorPicker.addEventListener('change', selectColor);
+
+</script>
+
+<style>
+  html, body {
+    margin:0;
+  }
+</style>
+
+</body>
+</html>
